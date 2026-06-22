@@ -323,11 +323,11 @@ cor_net_overall    <- cor.test(vars_clean$Amax, vars_clean$mean_net_mm,
 cor_byssus_overall <- cor.test(vars_clean$Amax, vars_clean$Byssus,
                                method = "spearman", exact = FALSE)
 
+
 make_label <- function(cor_obj) {
-  paste0("\u03c1 = ", round(cor_obj$estimate, 2),
+  paste0("rho = ", round(cor_obj$estimate, 2),
          ", p = ", signif(cor_obj$p.value, 2))
 }
-
 cor_theme <- theme_bw() +
   theme(
     strip.text   = element_text(face = "bold", size = 16),
