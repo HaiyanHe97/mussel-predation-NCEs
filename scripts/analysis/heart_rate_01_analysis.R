@@ -278,6 +278,7 @@ p_hr_spaghetti_infection <- ggplot(
                                 "CM"      = "#33a02c",
                                 "HT"      = "#e31a1c",
                                 "HS"      = "#ff7f00")) +
+  coord_cartesian(ylim = c(0, 50)) +
   labs(x = "Time (min)",
        y = "Heart rate (bpm)",
        color = "Predation risk cue") +

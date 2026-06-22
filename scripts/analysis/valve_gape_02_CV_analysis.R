@@ -105,6 +105,8 @@ emtrends(mod_continuous,
          pairwise ~ Status | Group,
          var = "time_min")
 
+
+
 # Model A Figures
 
 # Get model predictions over continuous time (0 to 30 min)
