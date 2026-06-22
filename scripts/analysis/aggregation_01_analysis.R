@@ -16,7 +16,7 @@ library(DHARMa)      # simulation-based residual diagnostics for mixed models
 library(tidyr)       # nest/unnest for grouped correlations
 library(purrr)       # map() for grouped correlations
 
-# 1. Read & format data
+# Read & format data
 
 move_total <- read.csv(
   "data/processed/merged_movement.csv",
@@ -39,7 +39,7 @@ move_total$Amax           <- as.numeric(move_total$Amax)
 move_total$mean_A         <- as.numeric(move_total$mean_A)
 move_total$total_time_agg <- as.numeric(move_total$total_time_agg)
 
-# 2. Time to First Aggregation - Start_Time (min)
+# 1. Time to First Aggregation - Start_Time (min)
 #    Definition: latency from trial start until the first 5-min interval at
 #                which any aggregation was observed (proportion > 0).
 #                Arenas where no aggregation occurred throughout the trial
@@ -69,30 +69,8 @@ pairs(emm9)
 emm10 <- emmeans(lmm_time, ~ Group | Status)
 pairs(emm10)
 
-# 3. Mean Total Distance - mean_gross_mm (mm)
-#    Definition: mean total path length (mm) travelled by each mussel across
-#                the full trial, summing all positional steps regardless of
-#                direction. Averaged across the 7 individuals per arena.
-#                Reflects overall locomotor activity.
-#    Model: LMM (untransformed - residuals checked below)
-#    Random effect: Rep (experimental block)
 
-lmm_gross <- lmer(mean_gross_mm ~ Group * Status + (1 | Rep),
-                  data = move_total)
-summary(lmm_gross)
-anova(lmm_gross)
-
-sim_res <- simulateResiduals(fittedModel = lmm_gross)
-plot(sim_res)
-
-# Post-hoc: infected vs uninfected within each cue type
-emm3 <- emmeans(lmm_gross, ~ Status | Group)
-pairs(emm3)
-# Post-hoc: cue type effect within each infection status
-emm4 <- emmeans(lmm_gross, ~ Group | Status)
-pairs(emm4)
-
-# 4. Total Aggregation Time - total_time_agg (min)
+# 2. Total Aggregation Time - total_time_agg (min)
 #    Definition: cumulative duration (min) during which aggregation was
 #                observed, calculated as the number of 5-min intervals with
 #                a non-zero aggregation proportion multiplied by 5.
@@ -125,7 +103,7 @@ emmeans(model_status, pairwise ~ Status)
 # emmeans(model_inter, pairwise ~ Group | Status)
 # emmeans(model_inter, pairwise ~ Status | Group)
 
-# 5. Mean Aggregation Proportion - mean_A (%)
+# 3. Mean Aggregation Proportion - mean_A (%)
 #    Definition: arithmetic mean of per-interval aggregation proportions
 #                across all 5-min observation intervals in the trial.
 #                Reflects the average tendency to aggregate throughout
@@ -151,32 +129,55 @@ emmeans(model_status, pairwise ~ Status)
 # emmeans(model_inter, pairwise ~ Group | Status)
 # emmeans(model_inter, pairwise ~ Status | Group)
 
-# 6. Byssus Thread Count - Byssus (count per mussel)
-#    Definition: number of byssus threads attached to the substratum or to
-#                other mussels per individual, counted at the end of the trial.
-#                Used as a proxy for settlement tendency and commitment to
-#                remaining in place (aggregation reinforcement).
-#    Model: LMM with log(x+1) transformation
-#    Rationale: count data, right-skewed with zeros; log-transform improves
-#               residual normality.
+# 4. Maximum Aggregation Proportion
+#    Definition: the highest aggregation proportion recorded across all 5-min
+#                observation intervals during the trial, representing the peak
+#                collective aggregation response. Also used as the response
+#                variable in conspecific taxis and aggregation strength
+#                correlations (Section 10).
+#    Model: ART two-way ANOVA
+#    Rationale: proportion data (0-100%), non-normal distribution.
+
+model_art <- art(Amax ~ Group * Status, data = move_total)
+anova(model_art)
+
+# Post-hoc: cue type effect
+model_group <- artlm(model_art, "Group")
+emmeans(model_group, pairwise ~ Group)
+
+# Post-hoc: infection status effect
+model_status <- artlm(model_art, "Status")
+emmeans(model_status, pairwise ~ Status)
+
+# Post-hoc: interaction (uncomment only if interaction term is significant)
+# model_inter <- artlm(model_art, "Group:Status")
+# emmeans(model_inter, pairwise ~ Group | Status)
+
+# 5. Mean Total Distance - mean_gross_mm (mm)
+#    Definition: mean total path length (mm) travelled by each mussel across
+#                the full trial, summing all positional steps regardless of
+#                direction. Averaged across the 7 individuals per arena.
+#                Reflects overall locomotor activity.
+#    Model: LMM (untransformed - residuals checked below)
 #    Random effect: Rep (experimental block)
 
-lmm_by2 <- lmer(log(Byssus + 1) ~ Group * Status + (1 | Rep),
-                data = move_total)
-summary(lmm_by2)
-anova(lmm_by2)
+lmm_gross <- lmer(mean_gross_mm ~ Group * Status + (1 | Rep),
+                  data = move_total)
+summary(lmm_gross)
+anova(lmm_gross)
 
-sim_res <- simulateResiduals(fittedModel = lmm_by2)
+sim_res <- simulateResiduals(fittedModel = lmm_gross)
 plot(sim_res)
 
-# Post-hoc: infected vs uninfected within each cue type (Bonferroni: conservative)
-emm1 <- emmeans(lmm_by2, ~ Status | Group, adjust = "bonferroni")
-pairs(emm1)
-# Post-hoc: cue type effect within each infection status (Tukey)
-emm2 <- emmeans(lmm_by2, ~ Group | Status, adjust = "tukey")
-pairs(emm2)
+# Post-hoc: infected vs uninfected within each cue type
+emm3 <- emmeans(lmm_gross, ~ Status | Group)
+pairs(emm3)
+# Post-hoc: cue type effect within each infection status
+emm4 <- emmeans(lmm_gross, ~ Group | Status)
+pairs(emm4)
 
-# 7. Mean Net Displacement - mean_net_mm (mm)
+
+# 6. Mean Net Displacement - mean_net_mm (mm)
 #    Definition: mean straight-line distance (mm) between each mussel's
 #                starting and ending position, averaged across the 7 individuals
 #                per arena. Unlike total distance, this metric captures net
@@ -202,7 +203,7 @@ pairs(emm5)
 emm6 <- emmeans(lmm_net2, ~ Group | Status)
 pairs(emm6)
 
-# 8. Mean Confinement Index - mean_CI (ratio, 0-1)
+# 7. Mean Confinement Index - mean_CI (ratio, 0-1)
 #    Definition: ratio of net displacement to total distance for each mussel,
 #                averaged across the 7 individuals per arena.
 #                Values near 1 = straight directed movement.
@@ -230,31 +231,38 @@ pairs(emm7)
 emm8 <- emmeans(lmm_ci, ~ Group | Status)
 pairs(emm8)
 
-# 9. Maximum Aggregation Proportion - Amax (%)
-#    Definition: the highest aggregation proportion recorded across all 5-min
-#                observation intervals during the trial, representing the peak
-#                collective aggregation response. Also used as the response
-#                variable in conspecific taxis and aggregation strength
-#                correlations (Section 10).
-#    Model: ART two-way ANOVA
-#    Rationale: proportion data (0-100%), non-normal distribution.
+# 8. Byssus Thread Count - Byssus (count per mussel)
+#    Definition: number of byssus threads attached to the substratum or to
+#                other mussels per individual, counted at the end of the trial.
+#                Used as a proxy for settlement tendency and commitment to
+#                remaining in place (aggregation reinforcement).
+#    Model: LMM with log(x+1) transformation
+#    Rationale: count data, right-skewed with zeros; log-transform improves
+#               residual normality.
+#    Random effect: Rep (experimental block)
 
-model_art <- art(Amax ~ Group * Status, data = move_total)
-anova(model_art)
+lmm_by2 <- lmer(log(Byssus + 1) ~ Group * Status + (1 | Rep),
+                data = move_total)
+summary(lmm_by2)
+anova(lmm_by2)
 
-# Post-hoc: cue type effect
-model_group <- artlm(model_art, "Group")
-emmeans(model_group, pairwise ~ Group)
+sim_res <- simulateResiduals(fittedModel = lmm_by2)
+plot(sim_res)
 
-# Post-hoc: infection status effect
-model_status <- artlm(model_art, "Status")
-emmeans(model_status, pairwise ~ Status)
+# Post-hoc: infected vs uninfected within each cue type (Bonferroni: conservative)
+emm1 <- emmeans(lmm_by2, ~ Status | Group, adjust = "bonferroni")
+pairs(emm1)
+# Post-hoc: cue type effect within each infection status (Tukey)
+emm2 <- emmeans(lmm_by2, ~ Group | Status, adjust = "tukey")
+pairs(emm2)
 
-# Post-hoc: interaction (uncomment only if interaction term is significant)
-# model_inter <- artlm(model_art, "Group:Status")
-# emmeans(model_inter, pairwise ~ Group | Status)
 
-# 10. Conspecific Taxis & Aggregation Strength - Spearman correlations
+
+
+
+
+
+# 9. Conspecific Taxis & Aggregation Strength - Spearman correlations
 #
 #     (A) Conspecific taxis: does higher locomotion predict higher aggregation?
 #         Variables: Amax ~ mean_gross_mm / mean_net_mm
