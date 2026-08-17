@@ -210,7 +210,10 @@ p_spaghetti_infection <- ggplot(
                                 "CM"      = "#33a02c",
                                 "HT"      = "#e31a1c",
                                 "HS"      = "#ff7f00")) +
-  scale_y_continuous(labels = function(y) round(exp(y) - 0.01, 2)) +
+scale_y_continuous(
+  breaks = log(c(0, 0.1, 0.2, 0.3, 0.4) + 0.01),
+  labels = function(y) round(exp(y) - 0.01, 2)
+)+
   labs(x = "Time (min)",
        y = "CV of valve gape",
        color = "Predation risk cue") +
