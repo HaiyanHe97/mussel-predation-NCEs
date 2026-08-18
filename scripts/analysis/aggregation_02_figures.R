@@ -35,11 +35,11 @@ col_status <- c("uninfected" = "#00BFC4", "infected" = "#F8766D")
 # ---- Common theme (all bold, size 13) ----
 base_theme <- theme_bw() +
   theme(
-    strip.text   = element_text(face = "bold", size = 13, color = "black"),
-    axis.text    = element_text(face = "bold", size = 13, color = "black"),
-    axis.title   = element_text(face = "bold", size = 13, color = "black"),
-    legend.title = element_text(face = "bold", size = 13, color = "black"),
-    legend.text  = element_text(face = "bold", size = 13, color = "black"),
+    strip.text   = element_text(face = "bold", size = 15, color = "black"),
+    axis.text    = element_text(face = "bold", size = 15, color = "black"),
+    axis.title   = element_text(face = "bold", size = 15, color = "black"),
+    legend.title = element_text(face = "bold", size = 15, color = "black"),
+    legend.text  = element_text(face = "bold", size = 15, color = "black"),
     legend.key.size = unit(0.5, "cm")
   )
 
@@ -148,3 +148,4 @@ figS3 <- make_single(move_total, "Byssus",
 figS3
 ggsave("outputs/figures/FigureS3_byssus.pdf",
        plot = figS3, width = 8, height = 6)
+
