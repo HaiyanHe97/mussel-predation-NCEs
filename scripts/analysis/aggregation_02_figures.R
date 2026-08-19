@@ -35,11 +35,11 @@ col_status <- c("uninfected" = "#00BFC4", "infected" = "#F8766D")
 # ---- Common theme (all bold, size 13) ----
 base_theme <- theme_bw() +
   theme(
-    strip.text   = element_text(face = "bold", size = 15, color = "black"),
-    axis.text    = element_text(face = "bold", size = 15, color = "black"),
-    axis.title   = element_text(face = "bold", size = 15, color = "black"),
-    legend.title = element_text(face = "bold", size = 15, color = "black"),
-    legend.text  = element_text(face = "bold", size = 15, color = "black"),
+    strip.text   = element_text(face = "bold", size = 16, color = "black"),
+    axis.text    = element_text(face = "bold", size = 16, color = "black"),
+    axis.title   = element_text(face = "bold", size = 16, color = "black"),
+    legend.title = element_text(face = "bold", size = 16, color = "black"),
+    legend.text  = element_text(face = "bold", size = 16, color = "black"),
     legend.key.size = unit(0.5, "cm")
   )
 
@@ -57,7 +57,7 @@ make_top <- function(data, yvar, ylab, tag) {
     theme(axis.title.x = element_blank(),
           axis.text.x  = element_blank(),
           axis.ticks.x = element_blank(),
-          plot.tag     = element_text(size = 13, face = "bold")) +
+          plot.tag     = element_text(size = 16, face = "bold")) +
     labs(y = ylab, x = NULL,
          fill = "Infection status", color = "Infection status", tag = tag)
 }
@@ -72,7 +72,7 @@ make_bottom <- function(data, yvar, ylab, tag) {
     scale_fill_manual(values = col_status) +
     scale_color_manual(values = col_status) +
     base_theme +
-    theme(plot.tag = element_text(size = 13, face = "bold")) +
+    theme(plot.tag = element_text(size = 16, face = "bold")) +
     labs(y = ylab, x = NULL,
          fill = "Infection status", color = "Infection status", tag = tag)
 }
@@ -149,3 +149,65 @@ figS3
 ggsave("outputs/figures/FigureS3_byssus.pdf",
        plot = figS3, width = 8, height = 6)
 
+# ================================================================
+# Figure S4: Overall Spearman correlations (n = 48 arenas)
+#   (a) maximum aggregation proportion vs mean total distance
+#   (b) maximum aggregation proportion vs mean net displacement
+#   (c) maximum aggregation proportion vs byssus thread count
+# ================================================================
+
+# ---- Data: remove rows with missing values ----
+vars_clean <- move_total %>%
+  select(Amax, mean_gross_mm, mean_net_mm, Byssus) %>%
+  drop_na()
+
+# ---- Spearman correlations ----
+cor_gross_overall  <- cor.test(vars_clean$Amax, vars_clean$mean_gross_mm,
+                               method = "spearman", exact = FALSE)
+cor_net_overall    <- cor.test(vars_clean$Amax, vars_clean$mean_net_mm,
+                               method = "spearman", exact = FALSE)
+cor_byssus_overall <- cor.test(vars_clean$Amax, vars_clean$Byssus,
+                               method = "spearman", exact = FALSE)
+
+# ---- Label helper: rho and p ----
+make_label <- function(cor_obj) {
+  paste0("rho = ", round(cor_obj$estimate, 2),
+         ", p = ", signif(cor_obj$p.value, 2))
+}
+
+# ---- Correlation panel builder (same base_theme, size 16) ----
+# left = TRUE keeps the y-axis title; FALSE drops it to avoid
+# repeating the same label across the three horizontal panels
+make_cor_panel <- function(data, xvar, xlab, cor_obj, tag, left = FALSE) {
+  p <- ggplot(data, aes(x = .data[[xvar]], y = Amax)) +
+    geom_point(size = 2.5, alpha = 0.5, color = "grey40") +
+    geom_smooth(method = "lm", se = TRUE, color = "black") +
+    annotate("text",
+             x = min(data[[xvar]], na.rm = TRUE),
+             y = max(data$Amax, na.rm = TRUE),
+             label = make_label(cor_obj),
+             hjust = 0, vjust = 1.2, size = 5) +
+    base_theme +
+    theme(plot.tag = element_text(size = 16, face = "bold")) +
+    labs(x = xlab,
+         y = "Maximum aggregation proportion (%)",
+         tag = tag)
+  if (!left) p <- p + theme(axis.title.y = element_blank())
+  p
+}
+
+# ---- Three panels (only the first keeps the y-axis title) ----
+s4_a <- make_cor_panel(vars_clean, "mean_gross_mm",
+                       "Mean total distance (mm)",
+                       cor_gross_overall, "a", left = TRUE)
+s4_b <- make_cor_panel(vars_clean, "mean_net_mm",
+                       "Mean net displacement (mm)",
+                       cor_net_overall, "b", left = FALSE)
+s4_c <- make_cor_panel(vars_clean, "Byssus",
+                       "Byssus thread count",
+                       cor_byssus_overall, "c", left = FALSE)
+
+figS4 <- wrap_plots(s4_a, s4_b, s4_c, ncol = 3)
+figS4
+ggsave("outputs/figures/FigureS4_correlations.pdf",
+       plot = figS4, width = 15, height = 6)
