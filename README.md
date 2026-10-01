@@ -1,4 +1,4 @@
-# Trematode infection and predator identity affect predation risk responses of the blue mussel *Mytilus edulis*
+# Parasitic infection and predator identity alter predation risk responses in mussels *Mytilus edulis*
 
 This repository contains the data and R code used to assess how trematode (*Himasthla elongata*) infection and predator identity affect the behavioural and physiological predation risk responses of the blue mussel (*Mytilus edulis*) to chemical cues from a native crab (*Carcinus maenas*) and two invasive crabs (*Hemigrapsus takanoi* and *H. sanguineus*).
 
@@ -10,10 +10,12 @@ Mussels (infected vs. uninfected) were exposed to one of four water-borne treatm
 - **Valve gape metrics** — valve opening (fraction open) and its temporal variability (coefficient of variation, CV)
 - **Heart rate** — cardiac activity (bpm), measured via the `heartbeatr` package
 
-For each assay, two complementary statistical models were fitted:
+For the time-resolved assays (**valve gape**, **CV of valve gape**, and **heart rate**), two complementary statistical models were fitted:
 
 - **Model A:** time as a continuous variable, to assess overall temporal trends
 - **Model B:** time as a categorical variable, to assess differences at specific time points
+
+The **aggregation and movement** metrics are single summary values per arena (no within-trial time dimension) and were instead analysed with linear mixed models (LMMs) and Aligned Rank Transform (ART) ANOVAs, with Spearman correlations for conspecific taxis and aggregation strength.
 
 ## Repository structure
 
@@ -81,9 +83,9 @@ Other files in this folder (e.g. `arena_model.csv`, `all_gape_with_mussel.csv`, 
 | `aggregation_01_analysis.R` | Linear mixed models (LMM) and Aligned Rank Transform (ART) ANOVAs for aggregation and movement metrics; Spearman correlations for conspecific taxis and aggregation strength |
 | `aggregation_02_figures.R` | Boxplots and correlation figures for aggregation/movement metrics |
 | `valve_gape_01_analysis.R` | Beta-distributed GLMMs (`glmmTMB`) for valve gape (Models A & B); covariate checks (shell length, infection intensity) |
-| `Valve_gape_01_figure.R` | Figures for valve gape responses over time by predator cue and infection status |
+| `valve_gape_01_figure.R` | Figures for valve gape responses over time by predator cue and infection status |
 | `valve_gape_02_CV_analysis.R` | LMMs for log-transformed valve gape CV (Models A & B); covariate checks |
-| `valve_gape_02_cv_figure.R` | Figures for valve gape CV over time by predator cue and infection status |
+| `valve_gape_02_CV_figure.R` | Figures for valve gape CV over time by predator cue and infection status |
 | `heart_rate_01_analysis.R` | LMMs for heart rate (Models A & B); covariate checks |
 | `heart_rate_01_figure.R` | Figures for heart rate responses over time by predator cue and infection status |
 
@@ -97,10 +99,10 @@ Other files in this folder (e.g. `arena_model.csv`, `all_gape_with_mussel.csv`, 
 
 ```r
 install.packages(c(
-  "dplyr", "tidyr", "stringr", "purrr", "readr", "tidyverse",
-  "ggplot2", "ggpubr", "gghalves",
+  "dplyr", "tidyr", "stringr", "purrr", "readr",
+  "ggplot2", "ggpubr", "gghalves", "patchwork",
   "lme4", "lmerTest", "glmmTMB", "emmeans", "car", "ARTool",
-  "DHARMa", "performance", "ggeffects", "mgcv",
+  "DHARMa", "performance", "ggeffects",
   "lubridate", "fs"
 ))
 ```
@@ -113,10 +115,10 @@ install.packages("heartbeatr")
 
 ## License
 
-This repository is licensed under the MIT License.
+Code in this repository is released under the MIT License. The data files are released under the Creative Commons Attribution 4.0 (CC BY 4.0) License.
 
 ## Notes
 
 - Raw sensor data folders (`gape_raw/`, `heart_rate_raw/`) are included in full, as their combined size is small enough for version control.
-- All figures are saved to `outputs/figures/` with filenames prefixed by assay (`aggregation_`, `valve_gape_`, `heart_rate_`).
-- Supplementary covariate checks (shell length and infection intensity tested as covariates in each model) are included at the end of each analysis script and summarised in the manuscript's supplementary materials (Table S1).
+- All figures are saved to `outputs/figures/` with filenames prefixed by their manuscript figure number (`Figure1_`, `Figure2_`, …, `FigureS1_`, `FigureS2_`, …).
+- Supplementary covariate checks (shell length and infection intensity) are included at the end of the valve gape, CV of valve gape, and heart rate analysis scripts and summarised in the manuscript's supplementary materials (Table S0); neither covariate was significant, so the final models exclude them.

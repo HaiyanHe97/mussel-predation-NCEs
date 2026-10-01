@@ -149,15 +149,35 @@ emm_df$time_bin <- factor(emm_df$time_bin)
 # 5. Supplementary: Shell length and infection intensity
 #    Neither had a significant effect on CV of valve gape
 
-# Model with shell length and infection intensity as covariates
-# Included to verify that individual variation in size or parasite load
-# does not confound the main treatment effects
-model_CV_full <- lmer(
-  VC_5min_logCV ~ Group * Status * time_bin + Length.mm. + Intensity +
-    (1 | Rep),
+# Model A versions (time continuous)
+mod_cv_length_cont <- lmer(
+  VC_5min_logCV ~ Status * Group * time_min + Length.mm. + (1 | Rep/Beaker_ID),
   data = total
 )
-summary(model_CV_full)
-anova(model_CV_full)
-# Result: neither Length.mm. nor Intensity were significant
-# Final models therefore exclude these covariates
+summary(mod_cv_length_cont)
+anova(mod_cv_length_cont)
+
+mod_cv_intensity_cont <- lmer(
+  VC_5min_logCV ~ Status * Group * time_min + Intensity + (1 | Rep/Beaker_ID),
+  data = total
+)
+summary(mod_cv_intensity_cont)
+anova(mod_cv_intensity_cont)
+
+# Model B versions (time categorical)
+mod_cv_length_cat <- lmer(
+  VC_5min_logCV ~ Status * Group * time_bin + Length.mm. + (1 | Rep/Beaker_ID),
+  data = total
+)
+summary(mod_cv_length_cat)
+anova(mod_cv_length_cat)
+
+mod_cv_intensity_cat <- lmer(
+  VC_5min_logCV ~ Status * Group * time_bin + Intensity + (1 | Rep/Beaker_ID),
+  data = total
+)
+summary(mod_cv_intensity_cat)
+anova(mod_cv_intensity_cat)
+
+# Result: neither shell length nor infection intensity was significant;
+# final models therefore exclude these covariates.
