@@ -1,4 +1,4 @@
-# Parasitic infection and predator identity alter predation risk responses in mussels *Mytilus edulis*
+# Parasitic infection and predator identity alter predation risk responses in mussels 
 
 This repository contains the data and R code used to assess how trematode (*Himasthla elongata*) infection and predator identity affect the behavioural and physiological predation risk responses of the blue mussel (*Mytilus edulis*) to chemical cues from a native crab (*Carcinus maenas*) and two invasive crabs (*Hemigrapsus takanoi* and *H. sanguineus*).
 
