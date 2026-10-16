@@ -22,7 +22,7 @@ move_total <- read.csv(
   "data/processed/merged_movement.csv",
   header = TRUE, sep = ",", stringsAsFactors = FALSE, fileEncoding = "UTF-8"
 )
-
+View(move_total)
 # Factor encoding
 move_total$Group  <- factor(move_total$Group,
                             levels = c("Control", "CM", "HT", "HS"))

@@ -12,10 +12,13 @@
 #   Figure S3: byssus thread count
 #
 # Shared layout: paired panels share the x-axis (Group); a single
-# legend is collected to the right; all fonts bold, size 13.
+# legend is collected to the right; all fonts bold, size 16.
+# Individual replicates are drawn as filled points with a black
+# outline so that they remain visible where they overlap the boxes.
 # ============================================================
 
 library(dplyr)
+library(tidyr)      # CHANGED: needed for drop_na() in Figure S4
 library(ggplot2)
 library(patchwork)
 
@@ -32,7 +35,7 @@ move_total$Status <- factor(move_total$Status,
 # ---- Colours ----
 col_status <- c("uninfected" = "#00BFC4", "infected" = "#F8766D")
 
-# ---- Common theme (all bold, size 13) ----
+# ---- Common theme (all bold, size 16) ----
 base_theme <- theme_bw() +
   theme(
     strip.text   = element_text(face = "bold", size = 16, color = "black"),
@@ -48,47 +51,53 @@ base_theme <- theme_bw() +
 make_top <- function(data, yvar, ylab, tag) {
   ggplot(data, aes(x = Group, y = .data[[yvar]], fill = Status)) +
     geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.8)) +
-    geom_jitter(aes(color = Status), alpha = 0.5, size = 1.5,
-                position = position_jitterdodge(jitter.width = 0.05,
-                                                dodge.width = 0.8)) +
+    # CHANGED: points filled with the box colour plus a black outline
+    geom_point(shape = 21, colour = "black", stroke = 0.6, size = 2,
+               show.legend = FALSE,
+               position = position_jitterdodge(jitter.width = 0.2,
+                                               dodge.width = 0.8,
+                                               seed = 1)) +
     scale_fill_manual(values = col_status) +
-    scale_color_manual(values = col_status) +
     base_theme +
     theme(axis.title.x = element_blank(),
           axis.text.x  = element_blank(),
           axis.ticks.x = element_blank(),
           plot.tag     = element_text(size = 16, face = "bold")) +
     labs(y = ylab, x = NULL,
-         fill = "Infection status", color = "Infection status", tag = tag)
+         fill = "Infection status", tag = tag)
 }
 
 # Bottom panel of a pair: keeps the x-axis
 make_bottom <- function(data, yvar, ylab, tag) {
   ggplot(data, aes(x = Group, y = .data[[yvar]], fill = Status)) +
     geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.8)) +
-    geom_jitter(aes(color = Status), alpha = 0.5, size = 1.5,
-                position = position_jitterdodge(jitter.width = 0.05,
-                                                dodge.width = 0.8)) +
+    # CHANGED: points filled with the box colour plus a black outline
+    geom_point(shape = 21, colour = "black", stroke = 0.6, size = 2,
+               show.legend = FALSE,
+               position = position_jitterdodge(jitter.width = 0.2,
+                                               dodge.width = 0.8,
+                                               seed = 1)) +
     scale_fill_manual(values = col_status) +
-    scale_color_manual(values = col_status) +
     base_theme +
     theme(plot.tag = element_text(size = 16, face = "bold")) +
     labs(y = ylab, x = NULL,
-         fill = "Infection status", color = "Infection status", tag = tag)
+         fill = "Infection status", tag = tag)
 }
 
 # Single (standalone) panel: keeps the x-axis, no tag
 make_single <- function(data, yvar, ylab) {
   ggplot(data, aes(x = Group, y = .data[[yvar]], fill = Status)) +
     geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.8)) +
-    geom_jitter(aes(color = Status), alpha = 0.5, size = 1.5,
-                position = position_jitterdodge(jitter.width = 0.05,
-                                                dodge.width = 0.8)) +
+    # CHANGED: points filled with the box colour plus a black outline
+    geom_point(shape = 21, colour = "black", stroke = 0.6, size = 2,
+               show.legend = FALSE,
+               position = position_jitterdodge(jitter.width = 0.2,
+                                               dodge.width = 0.8,
+                                               seed = 1)) +
     scale_fill_manual(values = col_status) +
-    scale_color_manual(values = col_status) +
     base_theme +
     labs(y = ylab, x = NULL,
-         fill = "Infection status", color = "Infection status")
+         fill = "Infection status")
 }
 
 # ================================================================
